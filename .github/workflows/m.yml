@@ -1,0 +1,57 @@
+name: CI - OnlineAnket Derleme Süreci
+
+on:
+  push:
+    branches: [ "main" ]
+  pull_request:
+    branches: [ "main" ]
+
+jobs:
+  build:
+    runs-on: ubuntu-latest
+
+    services:
+      mysql:
+        image: mysql:8.0
+        env:
+          MYSQL_DATABASE: onlineanketdb
+          MYSQL_ROOT_PASSWORD: 1234
+        ports:
+          - 3306:3306
+      
+        options: >-
+          --health-cmd="mysqladmin ping -h 127.0.0.1 -uroot -p1234"
+          --health-interval=10s
+          --health-timeout=5s
+          --health-retries=10
+
+    steps:
+      - name: Depoyu Kontrol Et
+        uses: actions/checkout@v4
+
+      - name: JDK 17 Kurulumu
+        uses: actions/setup-java@v4
+        with:
+          distribution: temurin
+          java-version: '17'
+          cache: maven
+
+      - name: MySQL hazır olana kadar bekle
+        run: |
+          for i in {1..40}; do
+            if mysqladmin ping -h 127.0.0.1 -uroot -p1234 --silent; then
+              echo "MySQL hazır"
+              break
+            fi
+            echo "MySQL bekleniyor..."
+            sleep 3
+          done
+
+      - name: Maven Test + Build
+        env:
+        
+          SPRING_DATASOURCE_URL: jdbc:mysql://127.0.0.1:3306/onlineanketdb?useSSL=false&serverTimezone=UTC&allowPublicKeyRetrieval=true&useUnicode=true&characterEncoding=utf8
+          SPRING_DATASOURCE_USERNAME: root
+          SPRING_DATASOURCE_PASSWORD: 1234
+          SPRING_JPA_HIBERNATE_DDL_AUTO: create-drop
+        run: mvn -B clean verify
