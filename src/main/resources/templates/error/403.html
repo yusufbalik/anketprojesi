@@ -1,0 +1,26 @@
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org">
+<head>
+    <title>Erişim Reddedildi</title>
+    <meta charset="UTF-8">
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <style>
+        body { font-family: 'Inter', sans-serif; background: #f8fafc; height: 100vh; display: flex; justify-content: center; align-items: center; margin: 0; color: #0f172a; }
+        .yasak-kutusu { background: white; padding: 60px 40px; border-radius: 24px; box-shadow: 0 25px 50px -12px rgba(0,0,0,0.1); text-align: center; max-width: 450px; border: 1px solid #e2e8f0; }
+        h1 { font-size: 80px; margin: 0; background: linear-gradient(135deg, #f97316 0%, #c2410c 100%); -webkit-background-clip: text; -webkit-text-fill-color: transparent; font-weight: 900; }
+        h2 { margin: 10px 0 16px; color: #1e293b; font-weight: 800; }
+        p { color: #64748b; margin-bottom: 32px; line-height: 1.6; font-size: 15px; }
+        .buton { background: #0f172a; color: white; text-decoration: none; padding: 14px 32px; border-radius: 50px; font-weight: 700; transition: 0.3s; display: inline-flex; align-items: center; gap: 10px; box-shadow: 0 10px 15px -3px rgba(15, 23, 42, 0.1); }
+        .buton:hover { background: #334155; transform: translateY(-2px); color: white; }
+    </style>
+</head>
+<body>
+    <div class="yasak-kutusu">
+        <h1>403</h1>
+        <h2>Dur Yolcu! <i class="fa-solid fa-hand"></i></h2>
+        <p>Girmeye çalıştığın <b>Admin Paneli</b> çok gizli bir bölge. Yetki kartını turnikede okutamadık.</p>
+        <a href="/" class="buton"><i class="fa-solid fa-house"></i> Güvenli Bölgeye Dön</a>
+    </div>
+</body>
+</html>

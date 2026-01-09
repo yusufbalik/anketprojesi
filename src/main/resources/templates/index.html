@@ -1,0 +1,660 @@
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org">
+<head>
+    <meta charset="UTF-8">
+    <title>Anket Dünyası | Dashboard</title>
+    <link rel="icon" href="data:image/svg+xml,<svg xmlns=%22http://www.w3.org/2000/svg%22 viewBox=%220 0 100 100%22><text y=%22.9em%22 font-size=%2290%22>📊</text></svg>">
+    
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800&display=swap" rel="stylesheet">
+    <link href="https://fonts.googleapis.com/css2?family=Dancing+Script:wght@700&family=Playfair+Display:ital,wght@1,600&display=swap" rel="stylesheet">
+    
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/vanilla-tilt/1.8.0/vanilla-tilt.min.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/canvas-confetti@1.6.0/dist/confetti.browser.min.js"></script>
+    
+    <style>
+        :root {
+            --grad-primary: linear-gradient(135deg, #1e293b 0%, #0f172a 100%); 
+            --grad-action: linear-gradient(135deg, #f97316 0%, #c2410c 100%); 
+            --text-dark: #0f172a;
+            --text-grey: #64748b;
+            --bg-body: #f1f5f9;
+            --glass-bg: rgba(255, 255, 255, 0.7);
+            --glass-border: 1px solid rgba(255, 255, 255, 0.5);
+            --border-color: #e2e8f0;
+        }
+
+        html { scroll-behavior: smooth; }
+
+        ::-webkit-scrollbar { width: 10px; }
+        ::-webkit-scrollbar-track { background: #f1f5f9; }
+        ::-webkit-scrollbar-thumb { background: linear-gradient(180deg, #f97316, #c2410c); border-radius: 10px; border: 2px solid #f1f5f9; }
+        ::-webkit-scrollbar-thumb:hover { background: #ea580c; }
+
+        body { 
+            font-family: 'Inter', sans-serif; 
+            background-color: var(--bg-body); 
+            background-image: 
+                radial-gradient(at 0% 0%, rgba(249, 115, 22, 0.15) 0px, transparent 50%),
+                radial-gradient(at 100% 100%, rgba(59, 130, 246, 0.15) 0px, transparent 50%);
+            background-attachment: fixed;
+            color: var(--text-dark); 
+            min-height: 100vh; margin: 0; padding: 0; display: flex; 
+        }
+        a { text-decoration: none !important; }
+
+        @keyframes fadeInUp {
+            from { opacity: 0; transform: translateY(20px); }
+            to { opacity: 1; transform: translateY(0); }
+        }
+
+        @keyframes pulse {
+            0% { box-shadow: 0 0 0 0 rgba(249, 115, 22, 0.7); }
+            70% { box-shadow: 0 0 0 10px rgba(249, 115, 22, 0); }
+            100% { box-shadow: 0 0 0 0 rgba(249, 115, 22, 0); }
+        }
+
+        /* --- SIDEBAR --- */
+        .sidebar { 
+            width: 280px; 
+            background: var(--glass-bg); 
+            backdrop-filter: blur(12px); -webkit-backdrop-filter: blur(12px);
+            height: 100vh; position: fixed; padding: 24px; 
+            border-right: var(--glass-border); 
+            display: flex; flex-direction: column; z-index: 100; 
+            box-shadow: 5px 0 25px rgba(0,0,0,0.03);
+        }
+
+        .brand-logo {
+            text-align: center; margin-bottom: 25px; padding-top: 10px;
+        }
+        .brand-logo h3 {
+            font-weight: 800; color: #f97316; font-size: 20px; letter-spacing: -0.5px; margin: 0;
+            display: flex; align-items: center; justify-content: center; gap: 10px;
+        }
+        .brand-logo p { color: #94a3b8; font-size: 11px; margin-top: 2px; font-weight: 500; }
+
+        .profil-header { margin: 0 -24px 24px -24px; padding: 20px 24px; background: rgba(255,255,255,0.5); border-bottom: 1px solid #e2e8f0; flex-shrink: 0; }
+        .profil-alani { display: flex; align-items: center; gap: 12px; }
+        .profil-ikonu { width: 45px; height: 45px; background: #fff; color: #f97316; border-radius: 12px; display: flex; align-items: center; justify-content: center; font-size: 20px; box-shadow: 0 4px 10px rgba(0,0,0,0.05); }
+        .profil-detay h4 { margin: 0; font-size: 15px; font-weight: 700; color: #1e293b; }
+        
+        .badge-premium { background: linear-gradient(135deg, #F2C94C, #F2994A); color: #fff; padding: 3px 8px; border-radius: 20px; font-size: 9px; font-weight: 800; margin-top: 5px; display: inline-flex; align-items: center; gap: 4px; }
+        .badge-admin { background: linear-gradient(135deg, #ef4444, #be123c); color: white; padding: 3px 8px; border-radius: 20px; font-size: 9px; font-weight: 800; margin-top: 3px; display: inline-block; }
+        
+        .xp-container { margin-top: 8px; background: #e2e8f0; height: 5px; border-radius: 10px; overflow: hidden; width: 100%; }
+        .xp-fill { height: 100%; border-radius: 10px; transition: width 1s ease; }
+        .xp-text { font-size: 10px; color: #64748b; margin-top: 4px; font-weight: 600; }
+
+        .menu-wrapper { flex-grow: 1; overflow-y: auto; padding-right: 5px; }
+        .menu-wrapper::-webkit-scrollbar { width: 4px; }
+        .menu-wrapper::-webkit-scrollbar-thumb { background: #cbd5e1; border-radius: 4px; }
+        .kategori-baslik { font-size: 11px; font-weight: 800; color: #94a3b8; margin-top: 20px; margin-bottom: 8px; padding-left: 12px; text-transform: uppercase; letter-spacing: 0.1em; }
+        .menu-linkleri a { display: flex; align-items: center; padding: 10px 16px; margin-bottom: 4px; color: var(--text-grey); border-radius: 10px; font-weight: 600; font-size: 14px; transition: all 0.2s ease; border-left: 3px solid transparent; }
+        .menu-linkleri a:hover { background: rgba(255,255,255,0.8); color: var(--text-dark); }
+        .menu-linkleri a.aktif { background: white; color: #c2410c; border-left-color: #f97316; box-shadow: 0 4px 10px rgba(0,0,0,0.05); }
+        .menu-linkleri i { margin-right: 14px; width: 20px; text-align: center; }
+
+        /* --- CONTENT --- */
+        .main-content { 
+            margin-left: 280px; padding: 40px 48px; width: 100%; max-width: 1600px; transition: 0.3s; 
+            animation: fadeInUp 0.8s ease-out; 
+            display: flex; flex-direction: column; min-height: 100vh;
+        }
+        
+        .header-search { 
+            background: var(--glass-bg); 
+            backdrop-filter: blur(12px); -webkit-backdrop-filter: blur(12px);
+            padding: 8px 16px; border-radius: 16px; display: flex; align-items: center; justify-content: space-between; 
+            box-shadow: 0 4px 20px -5px rgba(0,0,0,0.05); border: var(--glass-border); margin-bottom: 40px; 
+        }
+        
+        .search-input { background: transparent; border: none; outline: none; color: var(--text-dark); width: 100%; margin-left: 12px; font-size: 15px; font-weight: 500; }
+        .top-actions { display: flex; align-items: center; gap: 12px; }
+        .btn-yeni-anket { background: var(--grad-action); color: white; padding: 10px 24px; border-radius: 12px; font-weight: 700; font-size: 14px; box-shadow: 0 4px 12px rgba(249, 115, 22, 0.3); transition: 0.3s; display: inline-flex; align-items: center; text-decoration: none; }
+        .btn-yeni-anket:hover { transform: translateY(-2px); box-shadow: 0 8px 16px rgba(249, 115, 22, 0.4); color: white; }
+        .btn-cikis-header { background: #fff; color: #64748b; padding: 10px 20px; border-radius: 12px; font-weight: 700; font-size: 14px; border: 1px solid #e2e8f0; transition: 0.3s; display: inline-flex; align-items: center; gap: 8px; }
+        .btn-cikis-header:hover { background: #fef2f2; color: #ef4444; border-color: #fecaca; }
+
+        .anket-grid { display: grid; grid-template-columns: repeat(auto-fill, minmax(340px, 1fr)); gap: 32px; flex-grow: 1; }
+        
+        .kutu { 
+            background: rgba(255, 255, 255, 0.85); 
+            backdrop-filter: blur(10px); -webkit-backdrop-filter: blur(10px);
+            border-radius: 20px; 
+            box-shadow: 0 8px 32px rgba(0,0,0,0.05); 
+            border: 1px solid rgba(255, 255, 255, 0.6); 
+            position: relative; transition: box-shadow 0.3s; display: flex; flex-direction: column; overflow: hidden; 
+            transform-style: preserve-3d; transform: perspective(1000px); 
+        }
+        .kutu:hover { box-shadow: 0 20px 40px -10px rgba(0,0,0,0.15); border-color: rgba(255, 255, 255, 0.9); }
+        .kutu::before { content: ''; position: absolute; top: 0; left: 0; right: 0; height: 5px; background: var(--grad-primary); }
+        
+        .kutu[data-kategori="Teknoloji"]::before { background: linear-gradient(135deg, #3b82f6 0%, #1d4ed8 100%); }
+        .kutu[data-kategori="Spor"]::before { background: linear-gradient(135deg, #10b981 0%, #047857 100%); }
+        .kutu[data-kategori="Sinema"]::before { background: linear-gradient(135deg, #ef4444 0%, #b91c1c 100%); }
+        
+        .kutu-icerik { padding: 24px; flex-grow: 1; transform: translateZ(20px); position: relative; }
+
+        /* YENİ KART BAŞLIĞI DÜZENİ */
+        .card-top-header { display: flex; justify-content: space-between; align-items: flex-start; margin-bottom: 20px; }
+        .card-top-left { display: flex; gap: 8px; align-items: center; flex-wrap: wrap; }
+        .card-top-right { display: flex; gap: 8px; align-items: center; }
+
+        .badge-custom { display: inline-block; padding: 6px 12px; border-radius: 8px; font-size: 11px; font-weight: 800; text-transform: uppercase; background: #f1f5f9; color: #475569; letter-spacing: 0.5px; }
+        
+        .badge-trend-inline { 
+            background: linear-gradient(135deg, #f97316, #fbbf24); 
+            color: white; padding: 6px 12px; border-radius: 8px; 
+            font-size: 10px; font-weight: 800; 
+            box-shadow: 0 4px 10px rgba(249, 115, 22, 0.4);
+            animation: pulse 2s infinite; 
+            text-transform: uppercase;
+        }
+
+        .badge-expired-inline {
+            background: #ef4444; color: white; padding: 6px 12px; border-radius: 8px; font-size: 11px; font-weight: 800; text-transform: uppercase;
+        }
+
+        .btn-delete-card {
+            width: 32px; height: 32px; border-radius: 50%; background: #fee2e2; color: #ef4444; display: flex; align-items: center; justify-content: center; transition: 0.2s;
+        }
+        .btn-delete-card:hover { background: #ef4444; color: white; transform: rotate(15deg); }
+
+        .kutu h2 { color: var(--text-dark); font-size: 18px; font-weight: 800; margin: 0 0 10px 0; line-height: 1.4; }
+        .kutu p { color: var(--text-grey); font-size: 14px; margin-bottom: 24px; line-height: 1.6; }
+        
+        .card-actions { display: flex; gap: 10px; margin-top: auto; justify-content: flex-end; }
+        .btn-icon-action { border: none; background: transparent; color: #94a3b8; font-size: 16px; cursor: pointer; transition: 0.2s; }
+        .btn-icon-action:hover { color: #f97316; transform: scale(1.1); }
+
+        .secenek-wrapper { margin-bottom: 10px; }
+        .progress-container { position: relative; height: 50px; background: rgba(248, 250, 252, 0.8); border-radius: 12px; border: 1px solid var(--border-color); transition: 0.2s; overflow: hidden; cursor: pointer; transform: translateZ(30px); }
+        .progress-container:hover { border-color: #94a3b8; background: #fff; }
+        .progress-fill { height: 100%; background: var(--text-dark); opacity: 0.08; width: 0%; transition: width 0.6s ease; }
+        .progress-content { position: absolute; top: 0; left: 0; width: 100%; height: 100%; display: flex; justify-content: space-between; align-items: center; padding: 0 16px; font-size: 14px; font-weight: 600; color: #334155; }
+        .secenek-resim { width: 36px; height: 36px; border-radius: 8px; object-fit: cover; margin-right: 12px; border: 1px solid #e2e8f0; }
+        
+        .countdown-timer {
+            font-family: 'Courier New', monospace;
+            font-weight: 700; color: #f97316; font-size: 12px;
+            background: rgba(249, 115, 22, 0.1); padding: 4px 8px; border-radius: 6px;
+        }
+
+        .card-footer-info { padding: 16px 24px; background: rgba(248, 250, 252, 0.5); border-top: 1px solid var(--border-color); font-size: 12px; color: #64748b; font-weight: 600; display: flex; justify-content: space-between; align-items: center; transform: translateZ(20px); }
+        
+        .yorumlar-bolumu { padding: 15px 24px 20px 24px; background: rgba(255,255,255,0.6); border-top: 1px solid #f1f5f9; transform: translateZ(20px); }
+        .yorum-baslik { font-size: 13px; font-weight: 700; color: #64748b; margin-bottom: 8px; }
+        .yorum-listesi { max-height: 120px; overflow-y: auto; margin-bottom: 10px; padding-right: 5px;}
+        .tek-yorum { font-size: 13px; margin-bottom: 6px; padding-bottom: 6px; border-bottom: 1px solid #f8fafc; display: flex; justify-content: space-between; align-items: center; }
+        .yorum-yazan { font-weight: 700; color: #0f172a; margin-right: 5px; }
+        .yorum-metin { color: #475569; }
+        .yorum-form { display: flex; gap: 8px; }
+        .yorum-input { flex-grow: 1; background: rgba(248, 250, 252, 0.8); border: 1px solid #e2e8f0; padding: 8px 12px; border-radius: 8px; font-size: 13px; outline: none; }
+        .btn-yorum-gonder { background: #0f172a; color: white; border: none; border-radius: 8px; padding: 0 12px; cursor: pointer; }
+        
+        #toast-box { visibility: hidden; min-width: 250px; background-color: #333; color: #fff; text-align: center; border-radius: 8px; padding: 16px; position: fixed; z-index: 1000; left: 50%; bottom: 30px; transform: translateX(-50%); font-size: 14px; }
+        #toast-box.show { visibility: visible; animation: fadein 0.5s, fadeout 0.5s 2.5s; }
+        @keyframes fadein { from {bottom: 0; opacity: 0;} to {bottom: 30px; opacity: 1;} }
+        @keyframes fadeout { from {bottom: 30px; opacity: 1;} to {bottom: 0; opacity: 0;} }
+        
+        .grafik-alani { display: none; margin-bottom: 20px; height: 200px; justify-content: center; }
+
+        /* ZEN MODU (CSS DÜZELTMESİ YAPILDI) */
+        body.zen-active .sidebar, body.zen-active .header-search { display: none !important; }
+        body.zen-active .main-content { 
+            margin: 0; 
+            padding: 80px 20px 40px 20px; /* Üstten boşluk bırakıldı ki başlık görünsün */
+            width: 100vw; 
+            min-height: 100vh; /* height yerine min-height */
+            height: auto;
+            display: flex; 
+            align-items: flex-start; /* Merkeze sabitlemek yerine yukarıdan başlat */
+            justify-content: center; 
+            background: #0f172a; 
+            overflow-y: auto; /* Kaydırma serbest */
+        }
+        body.zen-active .anket-grid { 
+            display: block; 
+            width: 100%; 
+            max-width: 800px; 
+            margin: auto; /* Dikeyde yer varsa ortalar */
+        }
+        body.zen-active .kutu { box-shadow: 0 0 50px rgba(0,0,0,0.5); border: none; transform: none !important; } 
+        body.zen-active .zen-exit-btn { display: block; }
+        
+        .zen-exit-btn { display: none; position: fixed; top: 20px; right: 20px; background: rgba(255,255,255,0.1); color: white; padding: 10px 20px; border-radius: 30px; cursor: pointer; border: 1px solid rgba(255,255,255,0.2); z-index: 9999; }
+        .zen-exit-btn:hover { background: rgba(255,255,255,0.2); }
+        
+        /* FOOTER STYLES */
+        .elite-footer {
+            margin-top: 60px;
+            padding: 30px 40px;
+            background: rgba(255, 255, 255, 0.7);
+            backdrop-filter: blur(10px); -webkit-backdrop-filter: blur(10px);
+            border-top: 1px solid rgba(255, 255, 255, 0.6);
+            border-radius: 20px 20px 0 0;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            box-shadow: 0 -10px 30px rgba(0,0,0,0.02);
+            flex-wrap: wrap;
+            gap: 20px;
+        }
+        
+        .footer-left { display: flex; flex-direction: column; }
+        .footer-brand { font-size: 18px; font-weight: 800; color: #1e293b; letter-spacing: -0.5px; }
+        .footer-since { font-family: 'Playfair Display', serif; font-style: italic; color: #d97706; font-size: 14px; margin-top: 2px; }
+        
+        .footer-center { font-family: 'Dancing Script', cursive; font-size: 18px; color: #64748b; }
+        
+        .footer-right { display: flex; gap: 15px; }
+        .footer-icon { 
+            width: 36px; height: 36px; 
+            border-radius: 50%; 
+            background: white; 
+            color: #64748b; 
+            display: flex; align-items: center; justify-content: center; 
+            transition: all 0.3s cubic-bezier(0.175, 0.885, 0.32, 1.275);
+            box-shadow: 0 4px 10px rgba(0,0,0,0.05);
+            border: 1px solid #f1f5f9;
+        }
+        .footer-icon:hover { transform: translateY(-5px); color: #f97316; box-shadow: 0 8px 15px rgba(249, 115, 22, 0.2); }
+
+    </style>
+</head>
+<body>
+
+<div id="toast-box">İşlem yapılıyor...</div>
+
+<div class="zen-exit-btn" onclick="toggleZen(null)"><i class="fa-solid fa-compress me-2"></i> Zen Modundan Çık</div>
+
+<div class="sidebar">
+    
+    <div class="brand-logo">
+        <h3><i class="fa-solid fa-square-poll-vertical"></i> ANKET DÜNYASI</h3>
+        <p>Senin Fikrin, Senin Dünyan</p>
+    </div>
+
+    <div class="profil-header">
+        <div class="profil-alani">
+            <div class="profil-ikonu" th:style="${isPremium and !isAdmin} ? 'background: #fff3e0; color: #F2994A; border: 1px solid #F2994A;' : ''">
+                <i th:if="${isAdmin}" class="fa-solid fa-user-shield"></i>
+                <i th:if="${isPremium and !isAdmin}" class="fa-solid fa-crown"></i>
+                <i th:if="${!isPremium and !isAdmin}" class="fa-solid fa-user-astronaut"></i>
+            </div>
+            <div class="profil-detay">
+                <a href="/profil" style="color: inherit; text-decoration: none;">
+                    <h4 th:text="${kullaniciAdi != null ? kullaniciAdi : 'Misafir'}" style="cursor: pointer;">Kullanıcı</h4>
+                </a>
+                
+                <div th:if="${kullaniciAdi != null and !isAdmin}">
+                    <div style="font-size: 11px; font-weight: 700; color: #64748b; margin-top: 2px;">
+                        <span th:text="${kullaniciRutbe}">Çaylak</span>
+                    </div>
+                    <div class="xp-container">
+                        <div class="xp-fill" 
+                             th:style="'width:' + (${kullaniciPuan} > 500 ? 100 : (${kullaniciPuan} * 100 / 500)) + '%; background:' + ${kullaniciRutbeRenk}">
+                        </div>
+                    </div>
+                    <div class="xp-text">
+                        <span th:text="${kullaniciPuan} + ' / 500 XP'">0 / 500 XP</span>
+                    </div>
+                </div>
+
+                <div th:if="${isAdmin}" style="margin-top: 5px;"><span class="badge-admin">YÖNETİCİ</span></div>
+                <div th:if="${isPremium and !isAdmin}"><span class="badge-premium">PREMIUM</span></div>
+            </div>
+        </div>
+    </div>
+
+    <div th:if="${bildirimListesi != null}" style="margin-bottom: 20px; padding: 0 5px;">
+        <div style="display:flex; justify-content:space-between; align-items:center; color:#94a3b8; font-size:11px; font-weight:800; margin-bottom:10px; letter-spacing: 0.5px;">
+            <span>BİLDİRİMLER</span>
+            <a href="/bildirimleri-oku" th:if="${okunmamisBildirimSayisi > 0}" style="color:#f97316; text-decoration:none;">Tümünü Oku</a>
+        </div>
+        
+        <div style="max-height: 180px; overflow-y: auto; padding-right: 5px;">
+            <div th:each="b : ${bildirimListesi}" 
+                 th:style="${!b.okunduMu} ? 'background:rgba(249,115,22,0.1); border-left:3px solid #f97316;' : 'background:rgba(255,255,255,0.6); border-left:3px solid transparent;'"
+                 style="padding:10px; margin-bottom:8px; border-radius:8px; font-size:12px; color:#334155; transition:0.2s; position: relative;">
+                
+                <div style="display: flex; align-items: flex-start; gap: 8px;">
+                    <i class="fa-solid fa-bell" th:style="${!b.okunduMu} ? 'color:#f97316; margin-top:2px;' : 'color:#cbd5e1; margin-top:2px;'"></i>
+                    <div style="flex-grow: 1;">
+                        <span th:text="${b.icerik}" style="display:block; line-height:1.4; padding-right: 15px;">Mesaj içeriği...</span>
+                        <div style="font-size:10px; color:#94a3b8; margin-top:4px;" 
+                             th:text="${#temporals.format(b.tarih, 'dd.MM HH:mm')}">10:30</div>
+                    </div>
+                    
+                    <a th:href="@{/bildirim-sil/{id}(id=${b.id})}" 
+                       style="color: #ef4444; font-size: 10px; opacity: 0.6; transition: 0.2s;" 
+                       onmouseover="this.style.opacity='1'" onmouseout="this.style.opacity='0.6'"
+                       title="Bildirimi Sil">
+                        <i class="fa-solid fa-trash"></i>
+                    </a>
+                </div>
+            </div>
+            <div th:if="${bildirimListesi.empty}" style="text-align:center; color:#cbd5e1; font-size:11px; font-style:italic; padding: 10px;">Henüz bildirim yok.</div>
+        </div>
+    </div>
+    
+    <div class="menu-wrapper">
+        <div class="kategori-baslik">ANA MENÜ</div>
+        <div class="menu-linkleri">
+            <a href="/" th:classappend="${aktifSayfa == 'anasayfa' ? 'aktif' : ''}"><i class="fa-solid fa-layer-group"></i> Anasayfa</a>
+            <a href="/populer" th:classappend="${aktifSayfa == 'populer' ? 'aktif' : ''}"><i class="fa-solid fa-bolt"></i> Popüler</a>
+            <a href="/gecmis" th:classappend="${aktifSayfa == 'gecmis' ? 'aktif' : ''}"><i class="fa-solid fa-clock-rotate-left"></i> Geçmiş</a>
+        </div>
+        <div class="kategori-baslik">KEŞFET</div>
+		<div class="menu-linkleri">
+		    <a href="/kategori/Teknoloji" th:classappend="${aktifSayfa == 'Teknoloji' ? 'aktif' : ''}">
+		        <i class="fa-solid fa-microchip"></i> Teknoloji
+		    </a>
+
+		    <a href="/kategori/Spor" th:classappend="${aktifSayfa == 'Spor' ? 'aktif' : ''}">
+		        <i class="fa-solid fa-basketball"></i> Spor
+		    </a>
+
+		    <a href="/kategori/Sinema" th:classappend="${aktifSayfa == 'Sinema' ? 'aktif' : ''}">
+		        <i class="fa-solid fa-clapperboard"></i> Sinema & TV
+		    </a>
+
+		    <a href="/kategori/Yemek" th:classappend="${aktifSayfa == 'Yemek' ? 'aktif' : ''}">
+		        <i class="fa-solid fa-utensils"></i> Yemek
+		    </a>
+
+		    <a href="/kategori/Eğitim" th:classappend="${aktifSayfa == 'Eğitim' ? 'aktif' : ''}">
+		        <i class="fa-solid fa-graduation-cap"></i> Eğitim
+		    </a>
+
+		    <a href="/kategori/Siyaset" th:classappend="${aktifSayfa == 'Siyaset' ? 'aktif' : ''}">
+		        <i class="fa-solid fa-landmark"></i> Siyaset
+		    </a>
+
+		    <a href="/kategori/Saglik" th:classappend="${aktifSayfa == 'Saglik' ? 'aktif' : ''}">
+		        <i class="fa-solid fa-heart-pulse"></i> Sağlık
+		    </a>
+
+		    <a href="/kategori/Genel" th:classappend="${aktifSayfa == 'Genel' ? 'aktif' : ''}">
+		        <i class="fa-solid fa-layer-group"></i> Genel
+		    </a>
+		</div>
+        <div th:if="${isAdmin}" class="menu-linkleri">
+            <div class="kategori-baslik">YÖNETİM</div>
+            <a href="/admin" style="color: #be185d;"><i class="fa-solid fa-lock"></i> Admin Paneli</a>
+        </div>
+    </div>
+</div>
+
+<div class="main-content">
+    <div class="header-search">
+        <form action="/ara" method="get" style="display: flex; align-items: center; width: 100%;">
+            <i class="fa-solid fa-magnifying-glass" style="color: #94a3b8;"></i>
+            <input type="text" name="keyword" class="search-input" placeholder="Anketlerde ara..." th:value="${aramaKelimesi}">
+        </form>
+        <div class="top-actions">
+            <a href="/yeni-anket" class="btn-yeni-anket"><i class="fa-solid fa-plus me-2"></i> Sen de Anket Oluştur</a>
+            <a href="/logout" class="btn-cikis-header"><i class="fa-solid fa-power-off"></i> Çıkış</a>
+        </div>
+    </div>
+
+    <div th:if="${basariliMesaj}" class="alert-box alert-success"><i class="fa-solid fa-check-circle"></i> <span th:text="${basariliMesaj}"></span></div>
+    <div th:if="${hataMesaji}" class="alert-box alert-error"><i class="fa-solid fa-triangle-exclamation"></i> <span th:text="${hataMesaji}"></span></div>
+
+    <div class="anket-grid" id="anket-grid-container">
+        <div th:if="${anketListesi == null or anketListesi.empty}" style="grid-column: 1 / -1; text-align: center; color: #94a3b8; padding: 50px;">
+            <i class="fa-regular fa-folder-open fa-3x mb-3"></i><p>Henüz anket yok.</p>
+        </div>
+
+        <div class="kutu" th:each="anket : ${anketListesi}" th:id="'anket-kutu-' + ${anket.id}" th:attr="data-kategori=${anket.kategori}"
+             data-tilt data-tilt-glare data-tilt-max-glare="0.3" data-tilt-scale="1.02">
+             
+            <div class="kutu-icerik">
+                
+                <div class="card-top-header">
+                    <div class="card-top-left">
+                        <span class="badge-custom" th:text="${anket.kategori != null ? anket.kategori : 'Genel'}">GENEL</span>
+                        
+                        <div th:if="${!anket.isSuresiDoldu() and anket.toplamOy > 10}" class="badge-trend-inline">
+                            <i class="fa-solid fa-fire-flame-curved"></i> TREND
+                        </div>
+
+                        <div th:if="${anket.isSuresiDoldu()}" class="badge-expired-inline">
+                            <i class="fa-regular fa-clock"></i> SÜRE DOLDU
+                        </div>
+                    </div>
+
+                    <div class="card-top-right">
+                        <a th:if="${isAdmin}" th:href="@{/anket-sil/{id}(id=${anket.id})}" 
+                           onclick="return confirm('Emin misiniz?');" class="btn-delete-card" title="Anketi Sil">
+                           <i class="fa-regular fa-trash-can"></i>
+                        </a>
+                    </div>
+                </div>
+
+                <div style="display: flex; justify-content: space-between; align-items: flex-start;">
+                     <div>
+                        <h2 th:text="${anket.baslik}">Başlık</h2>
+                        <p th:text="${anket.aciklama}">Açıklama alanı...</p>
+                     </div>
+                     
+                     <div class="card-actions" style="margin-bottom: auto; margin-left: 10px;">
+                        <button class="btn-icon-action" th:onclick="'shareAnket(\'' + ${anket.id} + '\')'" title="Paylaş"><i class="fa-solid fa-share-nodes"></i></button>
+                        
+                        <button class="btn-icon-action" th:onclick="'toggleZen(' + ${anket.id} + ')'" title="Zen Modu"><i class="fa-solid fa-moon"></i></button>
+                        <button class="btn-icon-action" th:onclick="'toggleGrafik(' + ${anket.id} + ')'" title="Grafik"><i class="fa-solid fa-chart-pie"></i></button>
+                    </div>
+                </div>
+
+                <div th:id="'grafik-container-' + ${anket.id}" class="grafik-alani">
+                    <canvas th:id="'chart-' + ${anket.id}"></canvas>
+                </div>
+
+                <div th:id="'secenekler-container-' + ${anket.id}">
+                    <div class="secenek-wrapper" th:each="secenek : ${anket.secenekler}">
+                        <div class="progress-container" 
+                             th:onclick="${anket.isSuresiDoldu()} ? '' : 'oyVerAjax(' + ${secenek.id} + ')'"
+                             th:style="${anket.isSuresiDoldu()} ? 'pointer-events: none; opacity: 0.6;' : ''">
+                             
+                            <div class="progress-fill" th:style="'width:' + (${anket.toplamOy} > 0 ? (${secenek.oySayisi} * 100 / ${anket.toplamOy}) : 0) + '%'"></div>
+                            
+                            <div class="progress-content">
+                                <div style="display: flex; align-items: center;">
+                                    <img th:if="${secenek.resimUrl != null and secenek.resimUrl != ''}" 
+                                         th:src="${secenek.resimUrl}" class="secenek-resim">
+                                    <span th:text="${secenek.metin}"></span>
+                                </div>
+                                <span th:id="'oy-sayisi-' + ${secenek.id}" style="font-weight: 700;" th:text="${secenek.oySayisi}"></span>
+                            </div>
+                        </div>
+                        
+                        <input type="hidden" th:class="'veri-etiket-' + ${anket.id}" th:value="${secenek.metin}">
+                        <input type="hidden" th:class="'veri-sayi-' + ${anket.id}" th:value="${secenek.oySayisi}">
+                    </div>
+                </div>
+            </div>
+
+            <div class="card-footer-info">
+                <span><i class="fa-solid fa-chart-simple"></i> <span th:text="${anket.toplamOy}"></span> Oy</span>
+                
+                <span th:if="${!anket.isSuresiDoldu() and anket.bitisTarihi != null}" class="countdown-timer" th:attr="data-time=${anket.bitisTarihi}"></span>
+                
+                <span th:if="${!anket.isSuresiDoldu() and anket.bitisTarihi == null}" style="color: #10b981;">Süresiz</span>
+                <span th:if="${anket.isSuresiDoldu()}" style="color: #ef4444;">Tamamlandı</span>
+            </div>
+
+            <div class="yorumlar-bolumu">
+                <div class="yorum-baslik"><i class="fa-regular fa-comments"></i> Yorumlar</div>
+                <div class="yorum-listesi">
+                    <div th:if="${anket.yorumlar == null or anket.yorumlar.empty}" style="font-size: 12px; color: #cbd5e1;">Henüz yorum yok.</div>
+                    
+                    <div th:each="yorum : ${anket.yorumlar}" class="tek-yorum">
+                        <div>
+                            <span class="yorum-yazan" th:text="${yorum.kullanici.kullaniciAdi} + ':'"></span>
+                            <span class="yorum-metin" th:text="${yorum.icerik}"></span>
+                        </div>
+                        <a th:if="${isAdmin}" th:href="@{/yorum-sil/{id}(id=${yorum.id})}" onclick="return confirm('Silinsin mi?');" style="color: #ef4444;"><i class="fa-solid fa-trash"></i></a>
+                    </div>
+                </div>
+                <form action="/yorum-yap" method="post" class="yorum-form">
+                    <input type="hidden" name="anketId" th:value="${anket.id}">
+                    <input type="text" name="yorumMetni" class="yorum-input" placeholder="Bir yorum yaz..." required>
+                    <button type="submit" class="btn-yorum-gonder"><i class="fa-solid fa-paper-plane"></i></button>
+                </form>
+            </div>
+        </div>
+    </div>
+
+    <footer class="elite-footer">
+        <div class="footer-left">
+            <span class="footer-brand">ANKET DÜNYASI</span>
+            <span class="footer-since">Since 1980</span>
+        </div>
+        
+        <div class="footer-center">
+            Designed by MYB&AMD <i class="fa-solid fa-pen-nib"></i>
+        </div>
+        
+        <div class="footer-right">
+            <a href="#" class="footer-icon"><i class="fa-brands fa-github"></i></a>
+            <a href="#" class="footer-icon"><i class="fa-brands fa-twitter"></i></a>
+            <a href="#" class="footer-icon"><i class="fa-brands fa-instagram"></i></a>
+        </div>
+    </footer>
+
+</div> <script>
+    
+    // --- YENİ PAYLAŞIM FONKSİYONU ---
+    async function shareAnket(id) {
+        var link = window.location.origin + "/#anket-kutu-" + id;
+        var card = document.getElementById('anket-kutu-' + id);
+        var title = card.querySelector('h2').innerText;
+
+        var shareData = {
+            title: 'Anket Dünyası',
+            text: 'Bu ankete sen de katıl: ' + title,
+            url: link
+        };
+
+        try {
+            if (navigator.share) {
+                await navigator.share(shareData);
+            } else {
+                await navigator.clipboard.writeText(link);
+                showToast("Link kopyalandı! 📋");
+            }
+        } catch (err) {
+            console.error('Paylaşım hatası:', err);
+        }
+    }
+
+    function toggleZen(id) {
+        var body = document.body;
+        if (id) {
+            body.classList.add("zen-active");
+            var kutular = document.querySelectorAll(".kutu");
+            kutular.forEach(k => k.style.display = "none");
+            var seciliKutu = document.getElementById("anket-kutu-" + id);
+            seciliKutu.style.display = "flex";
+            var grafikDiv = document.getElementById('grafik-container-' + id);
+            if(grafikDiv.style.display === "none" || grafikDiv.style.display === "") {
+                grafikCiz(id);
+                grafikDiv.style.display = "flex";
+            }
+            if (seciliKutu.vanillaTilt) { seciliKutu.vanillaTilt.destroy(); }
+        } else {
+            body.classList.remove("zen-active");
+            var kutular = document.querySelectorAll(".kutu");
+            kutular.forEach(k => k.style.display = "flex");
+            VanillaTilt.init(document.querySelectorAll(".kutu"));
+        }
+    }
+
+    function oyVerAjax(secenekId) {
+        showToast("Oyunuz işleniyor...");
+        fetch('/api/oy-ver/' + secenekId)
+            .then(response => response.json())
+            .then(data => {
+                if (data.success) {
+                    confetti({
+                        particleCount: 100,
+                        spread: 70,
+                        origin: { y: 0.6 }
+                    });
+                    showToast("Oyunuz başarıyla kaydedildi! 🎉");
+                    setTimeout(() => { location.reload(); }, 1500); 
+                } else {
+                    showToast("Hata: " + data.message);
+                }
+            })
+            .catch(error => { console.error('Error:', error); showToast("Bir hata oluştu."); });
+    }
+
+    function showToast(message) {
+        var x = document.getElementById("toast-box");
+        x.className = "show";
+        x.innerText = message;
+        setTimeout(function(){ x.className = x.className.replace("show", ""); }, 3000);
+    }
+
+    function toggleGrafik(id) {
+        var grafikDiv = document.getElementById('grafik-container-' + id);
+        var seceneklerDiv = document.getElementById('secenekler-container-' + id);
+        if (grafikDiv.style.display === "none" || grafikDiv.style.display === "") {
+            grafikDiv.style.display = "flex"; seceneklerDiv.style.display = "none"; grafikCiz(id);
+        } else {
+            grafikDiv.style.display = "none"; seceneklerDiv.style.display = "block";
+        }
+    }
+    function grafikCiz(id) {
+        if (window['myChart' + id]) return;
+        var ctx = document.getElementById('chart-' + id).getContext('2d');
+        var etiketler = []; var sayilar = [];
+        var etiketInputlari = document.getElementsByClassName('veri-etiket-' + id);
+        var sayiInputlari = document.getElementsByClassName('veri-sayi-' + id);
+        for (var i = 0; i < etiketInputlari.length; i++) { etiketler.push(etiketInputlari[i].value); sayilar.push(sayiInputlari[i].value); }
+        window['myChart' + id] = new Chart(ctx, {
+            type: 'doughnut', data: { labels: etiketler, datasets: [{ data: sayilar, backgroundColor: ['#3b82f6', '#f97316', '#10b981', '#ef4444', '#8b5cf6', '#f59e0b'], borderWidth: 0 }] },
+            options: { responsive: true, maintainAspectRatio: false, plugins: { legend: { position: 'bottom', labels: { boxWidth: 10, font: { size: 10 } } } } }
+        });
+    }
+
+    function updateTimers() {
+        var timers = document.querySelectorAll('.countdown-timer');
+        timers.forEach(function(timer) {
+            var endTime = new Date(timer.getAttribute('data-time')).getTime();
+            var now = new Date().getTime();
+            var distance = endTime - now;
+
+            if (distance < 0) {
+                timer.innerText = "Süre Doldu";
+                timer.style.color = "#ef4444";
+            } else {
+                var days = Math.floor(distance / (1000 * 60 * 60 * 24));
+                var hours = Math.floor((distance % (1000 * 60 * 60 * 24)) / (1000 * 60 * 60));
+                var minutes = Math.floor((distance % (1000 * 60 * 60)) / (1000 * 60));
+                var seconds = Math.floor((distance % (1000 * 60)) / 1000);
+                
+                hours = hours < 10 ? "0" + hours : hours;
+                minutes = minutes < 10 ? "0" + minutes : minutes;
+                seconds = seconds < 10 ? "0" + seconds : seconds;
+
+                var text = "";
+                if(days > 0) text += days + " Gün ";
+                text += hours + ":" + minutes + ":" + seconds;
+                
+                timer.innerText = text;
+            }
+        });
+    }
+    setInterval(updateTimers, 1000);
+    updateTimers(); 
+
+    VanillaTilt.init(document.querySelectorAll(".kutu"));
+</script>
+
+</body>
+</html>

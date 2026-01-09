@@ -1,0 +1,83 @@
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org">
+<head>
+    <title>Plan Seçimi | Anket Dünyası</title>
+    <meta charset="UTF-8">
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800&display=swap" rel="stylesheet">
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    
+    <style>
+        :root {
+            --grad-dark: linear-gradient(135deg, #1e293b 0%, #0f172a 100%);
+            --grad-orange: linear-gradient(135deg, #f97316 0%, #c2410c 100%);
+            --bg-body: #f8fafc;
+            --text-dark: #0f172a;
+        }
+        body { font-family: 'Inter', sans-serif; background: var(--bg-body); min-height: 100vh; display: flex; align-items: center; justify-content: center; margin: 0; padding: 40px; }
+        .container-custom { max-width: 1000px; width: 100%; text-align: center; }
+        .page-title { font-size: 32px; font-weight: 800; color: var(--text-dark); margin-bottom: 10px; }
+        .page-subtitle { color: #64748b; font-size: 16px; margin-bottom: 50px; }
+        .pricing-grid { display: flex; gap: 30px; justify-content: center; flex-wrap: wrap; }
+        .plan-card { background: white; border-radius: 24px; padding: 40px; width: 100%; max-width: 380px; box-shadow: 0 10px 30px rgba(0,0,0,0.05); border: 2px solid transparent; transition: 0.3s; position: relative; display: flex; flex-direction: column; }
+        .plan-card:hover { transform: translateY(-10px); box-shadow: 0 20px 40px rgba(0,0,0,0.1); }
+        .plan-card.monthly { border-color: #e2e8f0; }
+        .plan-card.monthly .icon-box { color: #64748b; background: #f1f5f9; }
+        .plan-card.yearly { border: 2px solid #f97316; background: linear-gradient(to bottom, #fff7ed, #fff); }
+        .plan-card.yearly .icon-box { color: #f97316; background: #ffedd5; }
+        .badge-popular { position: absolute; top: -15px; left: 50%; transform: translateX(-50%); background: var(--grad-orange); color: white; padding: 8px 20px; border-radius: 50px; font-weight: 700; font-size: 12px; letter-spacing: 1px; box-shadow: 0 5px 15px rgba(249, 115, 22, 0.4); }
+        .icon-box { width: 64px; height: 64px; border-radius: 20px; display: flex; align-items: center; justify-content: center; font-size: 28px; margin: 0 auto 24px; }
+        .plan-name { font-size: 20px; font-weight: 700; color: var(--text-dark); margin-bottom: 10px; }
+        .price-tag { margin-bottom: 30px; }
+        .currency { font-size: 24px; font-weight: 600; vertical-align: top; }
+        .amount { font-size: 56px; font-weight: 800; color: var(--text-dark); }
+        .period { color: #94a3b8; font-weight: 600; }
+        .features-list { list-style: none; padding: 0; margin: 0 0 40px 0; text-align: left; flex-grow: 1; }
+        .features-list li { margin-bottom: 16px; color: #334155; font-size: 15px; display: flex; align-items: center; gap: 12px; }
+        .features-list li i { color: #10b981; font-size: 18px; }
+        .btn-select { width: 100%; padding: 16px; border-radius: 14px; font-size: 16px; font-weight: 700; border: none; cursor: pointer; transition: 0.3s; text-decoration: none; display: block; text-align: center; }
+        .btn-monthly { background: #f1f5f9; color: #0f172a; }
+        .btn-monthly:hover { background: #e2e8f0; }
+        .btn-yearly { background: var(--grad-orange); color: white; box-shadow: 0 10px 20px -5px rgba(249, 115, 22, 0.3); }
+        .btn-yearly:hover { transform: translateY(-2px); box-shadow: 0 15px 30px -5px rgba(249, 115, 22, 0.5); }
+        .cancel-link { display: block; margin-top: 40px; color: #94a3b8; text-decoration: none; font-weight: 600; font-size: 14px; }
+    </style>
+</head>
+<body>
+    <div class="container-custom">
+        <h1 class="page-title">Kendine Uygun Planı Seç</h1>
+        <p class="page-subtitle">Premium özelliklere erişerek sınırsız anket oluşturmaya başla.</p>
+
+        <div class="pricing-grid">
+            <div class="plan-card monthly">
+                <div class="icon-box"><i class="fa-regular fa-calendar"></i></div>
+                <div class="plan-name">Aylık Plan</div>
+                <div class="price-tag"><span class="currency">₺</span><span class="amount">99</span><span class="period">/ay</span></div>
+                <ul class="features-list">
+                    <li><i class="fa-solid fa-check"></i> Sınırsız Anket Oluşturma</li>
+                    <li><i class="fa-solid fa-check"></i> Anlık Sonuç Takibi</li>
+                    <li><i class="fa-solid fa-check"></i> Tüm Kategoriler</li>
+                    <li style="color: #94a3b8; text-decoration: line-through;"><i class="fa-solid fa-xmark" style="color: #cbd5e1;"></i> İndirim Avantajı</li>
+                </ul>
+                <a href="/odeme-sayfasi?paketTipi=Aylık" class="btn-select btn-monthly">Planı Seç</a>
+            </div>
+
+            <div class="plan-card yearly">
+                <div class="badge-popular">EN POPÜLER</div>
+                <div class="icon-box"><i class="fa-solid fa-rocket"></i></div>
+                <div class="plan-name">Yıllık Plan</div>
+                <div class="price-tag"><span class="currency">₺</span><span class="amount">890</span><span class="period">/yıl</span></div>
+                <div style="color: #f97316; font-size: 13px; font-weight: 700; margin-top: -20px; margin-bottom: 20px;">(2 Ay Bedava! 🎉)</div>
+                <ul class="features-list">
+                    <li><i class="fa-solid fa-check"></i> <b>Sınırsız Anket Oluşturma</b></li>
+                    <li><i class="fa-solid fa-check"></i> <b>Anlık Sonuç Takibi</b></li>
+                    <li><i class="fa-solid fa-check"></i> <b>Tüm Kategoriler</b></li>
+                    <li><i class="fa-solid fa-check"></i> <b>Öncelikli Destek</b></li>
+                </ul>
+                <a href="/odeme-sayfasi?paketTipi=Yıllık" class="btn-select btn-yearly">Yıllık Satın Al</a>
+            </div>
+        </div>
+        <a href="/" class="cancel-link">← Belki daha sonra</a>
+    </div>
+</body>
+</html>

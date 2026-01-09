@@ -1,0 +1,75 @@
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org">
+<head>
+    <title>Giriş Yap</title>
+    <meta charset="UTF-8">
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    
+    <style>
+        :root {
+            --grad-action: linear-gradient(135deg, #f97316 0%, #c2410c 100%);
+            --bg-body: #f8fafc;
+        }
+        body {
+            font-family: 'Inter', sans-serif;
+            background: var(--bg-body);
+            height: 100vh;
+            display: flex; justify-content: center; align-items: center; margin: 0;
+        }
+        .login-kutusu {
+            background: white; padding: 48px; border-radius: 24px;
+            box-shadow: 0 20px 25px -5px rgba(0,0,0,0.1);
+            width: 100%; max-width: 400px; text-align: center;
+            border: 1px solid #e2e8f0;
+        }
+        .icon-box {
+            font-size: 32px; color: #f97316; margin-bottom: 20px;
+            background: #fff7ed; width: 80px; height: 80px; 
+            display: inline-flex; align-items: center; justify-content: center;
+            border-radius: 50%;
+        }
+        h2 { color: #0f172a; margin: 0 0 8px 0; font-weight: 800; }
+        p.alt-baslik { color: #64748b; font-size: 14px; margin-bottom: 32px; }
+        
+        input {
+            width: 100%; padding: 14px; margin: 8px 0;
+            border: 1px solid #cbd5e1; border-radius: 12px;
+            background: #f8fafc; outline: none; transition: 0.3s; font-family: 'Inter';
+        }
+        input:focus { border-color: #f97316; background: #fff; box-shadow: 0 0 0 4px rgba(249, 115, 22, 0.1); }
+        
+        button {
+            width: 100%; padding: 14px; background: var(--grad-action);
+            color: white; border: none; border-radius: 12px;
+            font-size: 16px; font-weight: 700; cursor: pointer;
+            transition: 0.3s; margin-top: 16px;
+            box-shadow: 0 4px 12px rgba(249, 115, 22, 0.3);
+        }
+        button:hover { transform: translateY(-2px); box-shadow: 0 8px 16px rgba(249, 115, 22, 0.4); }
+        
+        .hata { background: #fef2f2; color: #b91c1c; padding: 12px; border-radius: 8px; font-size: 13px; font-weight: 600; margin-bottom: 20px; border: 1px solid #fecaca; }
+        .basari { background: #ecfdf5; color: #047857; padding: 12px; border-radius: 8px; font-size: 13px; font-weight: 600; margin-bottom: 20px; border: 1px solid #a7f3d0; }
+        
+        .kayit-link { display: block; margin-top: 24px; color: #64748b; text-decoration: none; font-size: 14px; font-weight: 500; }
+        .kayit-link b { color: #f97316; }
+    </style>
+</head>
+<body>
+    <div class="login-kutusu">
+        <div class="icon-box"><i class="fa-solid fa-fingerprint"></i></div>
+        <h2>Hoş Geldiniz</h2>
+        <p class="alt-baslik">Devam etmek için giriş yapın.</p>
+        
+        <div th:if="${param.error}" class="hata"><i class="fa-solid fa-circle-xmark"></i> Kullanıcı adı veya şifre hatalı!</div>
+        <div th:if="${param.logout}" class="basari"><i class="fa-solid fa-check"></i> Başarıyla çıkış yapıldı.</div>
+
+        <form th:action="@{/login}" method="post">
+            <input type="text" name="username" placeholder="Kullanıcı Adı" required autofocus>
+            <input type="password" name="password" placeholder="Şifre" required>
+            <button type="submit">GİRİŞ YAP</button>
+        </form>
+        <a href="/register" class="kayit-link">Hesabın yok mu? <b>Kayıt Ol</b></a>
+    </div>
+</body>
+</html>

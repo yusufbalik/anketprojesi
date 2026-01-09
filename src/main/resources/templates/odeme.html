@@ -1,0 +1,61 @@
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org">
+<head>
+    <title>Güvenli Ödeme | Anket Dünyası</title>
+    <meta charset="UTF-8">
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800&display=swap" rel="stylesheet">
+    
+    <style>
+        body {
+            font-family: 'Inter', sans-serif;
+            background: #f1f5f9; /* Titanyum tema arka planı */
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            justify-content: center;
+            min-height: 100vh;
+            margin: 0;
+        }
+        
+        .container {
+            text-align: center;
+            width: 100%;
+            max-width: 900px; /* Iyzico formu geniş olduğu için alan açtık */
+            padding: 20px;
+        }
+
+        h2 { 
+            color: #1e293b; 
+            margin-bottom: 10px; 
+            font-weight: 800;
+        }
+        
+        p { 
+            color: #64748b; 
+            margin-bottom: 30px; 
+            font-size: 15px;
+        }
+        
+        /* Iyzico Formunun yerleşeceği kutu */
+        #iyzipay-checkout-form {
+            border-radius: 12px;
+            overflow: hidden;
+            box-shadow: 0 20px 50px rgba(0,0,0,0.1);
+            background: white;
+            min-height: 500px; /* Yüklenirken boş görünmesin */
+        }
+    </style>
+</head>
+<body>
+
+    <div class="container">
+        <h2>Güvenli Ödeme Ekranı</h2>
+        <p>Aşağıdaki form Iyzico güvencesiyle açılmaktadır.</p>
+        
+        <div th:utext="${iyzicoFormIcerigi}"></div>
+        
+        <div id="iyzipay-checkout-form" class="responsive"></div>
+    </div>
+
+</body>
+</html>
