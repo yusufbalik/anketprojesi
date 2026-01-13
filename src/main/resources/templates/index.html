@@ -528,12 +528,12 @@
 </div> <script>
     
 
+   // --- GÜVENLİ PAYLAŞIM VE KOPYALAMA FONKSİYONU ---
     async function shareAnket(id) {
-   
+        // Sunucu adresini sabitliyoruz (HTTP olduğu için önemli)
         var sunucuAdresi = "http://13.53.101.71:8080"; 
-     
-        var link = sunucuAdresi + "/#anket-kutu-" + id;
         
+        var link = sunucuAdresi + "/#anket-kutu-" + id;
         var card = document.getElementById('anket-kutu-' + id);
         var title = card.querySelector('h2').innerText;
 
@@ -543,36 +543,30 @@
             url: link
         };
 
-      
+        // 1. YÖNTEM: Mobil Paylaşım Menüsü (HTTPS veya Localhost)
         if (navigator.share) {
             try {
                 await navigator.share(shareData);
-                return; // Başarılıysa çık
+                return;
             } catch (err) {
                 console.log('Share API kullanılamadı, kopyalamaya geçiliyor...');
             }
         }
 
-     
-        try {
-            await navigator.clipboard.writeText(link);
-            showToast("Link kopyalandı! 📋");
-        } catch (err) {
-           
-            console.warn('Güvenli kopyalama çalışmadı, yedek yöntem deneniyor...');
-            fallbackCopyTextToClipboard(link);
-        }
+        // 2. YÖNTEM: HTTP İÇİN ESKİ USUL KOPYALAMA (SENİN İÇİN BU ÇALIŞACAK)
+        fallbackCopyTextToClipboard(link);
     }
 
-  
+    // HTTP sitelerde panoya kopyalamayı sağlayan yedek fonksiyon
     function fallbackCopyTextToClipboard(text) {
         var textArea = document.createElement("textarea");
         textArea.value = text;
         
-     
+        // Gizli bir kutu oluşturup kopyalama yapıyoruz
         textArea.style.top = "0";
         textArea.style.left = "0";
         textArea.style.position = "fixed";
+        textArea.style.opacity = "0";
 
         document.body.appendChild(textArea);
         textArea.focus();
@@ -591,6 +585,23 @@
 
         document.body.removeChild(textArea);
     }
+
+    // --- SAYFA YÜKLENDİĞİNDE PAYLAŞILAN ANKETİ OTOMATİK AÇ ---
+    document.addEventListener("DOMContentLoaded", function() {
+        // Eğer linkte #anket-kutu-X varsa
+        if(window.location.hash && window.location.hash.startsWith("#anket-kutu-")) {
+            // ID'yi çekip alıyoruz (Örn: anket-kutu-5 -> 5)
+            var anketId = window.location.hash.replace("#anket-kutu-", "");
+            
+            if(anketId) {
+                console.log("Paylaşılan anket açılıyor: " + anketId);
+                // 500ms bekleyip Zen modunu açıyoruz (Sayfa tam otursun diye)
+                setTimeout(function() {
+                    toggleZen(anketId);
+                }, 500);
+            }
+        }
+    });
     function toggleZen(id) {
         var body = document.body;
         if (id) {
