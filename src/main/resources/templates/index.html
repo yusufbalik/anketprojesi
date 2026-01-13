@@ -527,29 +527,33 @@
 
 </div> <script>
     
-    // --- YENİ PAYLAŞIM FONKSİYONU ---
     async function shareAnket(id) {
-        var link = window.location.origin + "/#anket-kutu-" + id;
-        var card = document.getElementById('anket-kutu-' + id);
-        var title = card.querySelector('h2').innerText;
 
-        var shareData = {
-            title: 'Anket Dünyası',
-            text: 'Bu ankete sen de katıl: ' + title,
-            url: link
-        };
+	        var sunucuAdresi = "http://13.53.101.71:8080/"; 
 
-        try {
-            if (navigator.share) {
-                await navigator.share(shareData);
-            } else {
-                await navigator.clipboard.writeText(link);
-                showToast("Link kopyalandı! 📋");
-            }
-        } catch (err) {
-            console.error('Paylaşım hatası:', err);
-        }
-    }
+	        var link = sunucuAdresi + "/#anket-kutu-" + id;
+	        
+	        var card = document.getElementById('anket-kutu-' + id);
+	        var title = card.querySelector('h2').innerText;
+
+	        var shareData = {
+	            title: 'Anket Dünyası',
+	            text: 'Bu ankete sen de katıl: ' + title,
+	            url: link
+	        };
+
+	        try {
+	            if (navigator.share) {
+	                await navigator.share(shareData);
+	            } else {
+	                // Bilgisayardan girenler için panoya kopyalama
+	                await navigator.clipboard.writeText(link);
+	                showToast("Link kopyalandı! 📋");
+	            }
+	        } catch (err) {
+	            console.error('Paylaşım hatası:', err);
+	        }
+	    }
 
     function toggleZen(id) {
         var body = document.body;
