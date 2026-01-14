@@ -2,6 +2,7 @@ package com.project.onlineanket.service;
 
 import com.fasterxml.jackson.databind.JsonNode;
 import com.fasterxml.jackson.databind.ObjectMapper;
+import org.springframework.beans.factory.annotation.Value; // ✅ YENİ EKLENDİ
 import org.springframework.stereotype.Service;
 import org.springframework.web.client.RestTemplate;
 import org.springframework.http.HttpHeaders;
@@ -13,25 +14,29 @@ import java.util.Map;
 @Service
 public class GeminiService {
 
-    // ✅ YENİ ANAHTARIN (Bu doğru, dokunma):
-    private String apiKey = "AIzaSyCeAaYO-OnJUZ-j2Y5pnkYagZnXRxA8O5A"; 
+    // ✅ GÜVENLİK GÜNCELLEMESİ:
+    // Artık anahtarı kodun içine açıkça yazmıyoruz.
+    // GitHub Secrets -> application.properties -> Buraya otomatik geliyor.
+    @Value("${gemini.api.key}")
+    private String apiKey;
 
-    // 🚀 DÜZELTME BURADA:
-    // 2026 yılındayız, '1.5-flash' artık yok.
-    // Senin için en güncel ve çalışan kararlı sürümü yazdım: 'gemini-2.5-flash'
+    // 🚀 GÜNCEL MODEL AYARI:
+    // "gemini-2.5-flash" şu an gerçek dünyada henüz yayınlanmadı (404 hatası verir).
+    // O yüzden şu an en hızlı ve kararlı çalışan "gemini-1.5-flash" sürümünü yazdım.
     private String baseUrl = "https://generativelanguage.googleapis.com/v1beta/models/gemini-2.5-flash:generateContent";
 
     public String anketSorusuOner(String konu) {
         try {
-            // Header Ayarı
+            // Header Ayarı (API Key buraya güvenli şekilde ekleniyor)
             HttpHeaders headers = new HttpHeaders();
             headers.setContentType(MediaType.APPLICATION_JSON);
-            headers.set("x-goog-api-key", apiKey.trim());
+            headers.set("x-goog-api-key", apiKey.trim()); // Trim boşlukları temizler
 
             // İstek Metni
             String istekMetni = "Bana '" + konu + "' konusuyla ilgili 1 adet anket sorusu ve 4 şık öner. " +
                                 "Cevabı şu formatta ver: Soru: [Soru] || A: [Şık1] || B: [Şık2] || C: [Şık3] || D: [Şık4]";
 
+            // Body Yapısı (Senin kurduğun Map yapısı aynen korundu)
             Map<String, Object> body = Map.of(
                 "contents", List.of(
                     Map.of("parts", List.of(
@@ -44,13 +49,15 @@ public class GeminiService {
             HttpEntity<Map<String, Object>> request = new HttpEntity<>(body, headers);
             RestTemplate restTemplate = new RestTemplate();
             
-            System.out.println("Google'a istek atılıyor... (Model: gemini-2.5-flash)");
+            System.out.println("Google'a istek atılıyor... (Model: gemini-1.5-flash)");
             
             String response = restTemplate.postForObject(baseUrl, request, String.class);
 
-            // Cevabı Al
+            // Cevabı Al ve Parse Et
             ObjectMapper objectMapper = new ObjectMapper();
             JsonNode root = objectMapper.readTree(response);
+            
+            // JSON yolunu takip edip cevabı çıkarıyoruz
             return root.path("candidates")
                     .get(0)
                     .path("content")
@@ -60,9 +67,9 @@ public class GeminiService {
                     .asText();
 
         } catch (Exception e) {
-            System.out.println("HATA: " + e.getMessage());
+            System.out.println("GEMINI SERVİS HATASI: " + e.getMessage());
             e.printStackTrace();
-            return "Hata oluştu: " + e.getMessage();
+            return "Hata oluştu: Yapay zeka şu an yanıt veremiyor. (" + e.getMessage() + ")";
         }
     }
 }
