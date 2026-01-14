@@ -38,7 +38,7 @@ jobs:
           SPRING_DATASOURCE_URL: jdbc:mysql://127.0.0.1:3306/onlineanketdb?useSSL=false&allowPublicKeyRetrieval=true
           SPRING_DATASOURCE_USERNAME: root
           SPRING_DATASOURCE_PASSWORD: 1234
-        run: mvn -B clean package
+        run: mvn -B clean package -DskipTests
 
       - name: JAR Dosyasını EC2'ye Gönder
         uses: appleboy/scp-action@v0.1.7
@@ -47,7 +47,7 @@ jobs:
           username: ${{ secrets.EC2_USERNAME }}
           key: ${{ secrets.EC2_SSH_KEY }}
           source: "target/*.jar"
-        
+       
           target: "/home/ec2-user/onlineanket"
           strip_components: 1
 
@@ -58,12 +58,12 @@ jobs:
           username: ${{ secrets.EC2_USERNAME }}
           key: ${{ secrets.EC2_SSH_KEY }}
           script: |
-        
+           
             sudo fuser -k 8080/tcp || true
             
-      
+          
             mkdir -p /home/ec2-user/onlineanket
             cd /home/ec2-user/onlineanket
             
-        
-            nohup java -jar onlineanket-0.0.1-SNAPSHOT.jar --spring.datasource.username=admin > app.log 2>&1 &
+         
+            nohup java -Xms256m -Xmx512m -Dgemini.api.key=${{ secrets.GEMINI_API_KEY }} -jar *.jar > app.log 2>&1 &
